@@ -24,10 +24,17 @@ const MAX_URL_BYTES: usize = 8 * 1024;
 /// embedded usernames or passwords. Callers must still apply network policy,
 /// redirect checks, DNS/IP filtering, and TLS validation before connecting.
 pub fn normalize_navigation_target(target: &str) -> Result<String, NavigationError> {
+    normalize_navigation_target_with_limit(target, MAX_URL_BYTES)
+}
+
+pub(crate) fn normalize_navigation_target_with_limit(
+    target: &str,
+    max_url_bytes: usize,
+) -> Result<String, NavigationError> {
     if target.is_empty() {
         return Err(NavigationError::Empty);
     }
-    if target.len() > MAX_URL_BYTES {
+    if target.len() > max_url_bytes {
         return Err(NavigationError::TooLong);
     }
     if target.chars().any(char::is_control) {
