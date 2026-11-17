@@ -75,6 +75,34 @@ impl HtmlNode {
         }
     }
 
+    /// Returns the comment contents when this node is a comment.
+    pub fn comment_data(&self) -> Option<&str> {
+        match &self.0.kind {
+            NodeKind::Comment(data) => Some(data),
+            _ => None,
+        }
+    }
+
+    /// Returns the doctype name, public identifier, and system identifier.
+    pub fn doctype(&self) -> Option<(&str, &str, &str)> {
+        match &self.0.kind {
+            NodeKind::Doctype {
+                name,
+                public_id,
+                system_id,
+            } => Some((name, public_id, system_id)),
+            _ => None,
+        }
+    }
+
+    /// Returns the processing-instruction target and data.
+    pub fn processing_instruction(&self) -> Option<(&str, &str)> {
+        match &self.0.kind {
+            NodeKind::ProcessingInstruction { target, data } => Some((target, data)),
+            _ => None,
+        }
+    }
+
     pub fn children(&self) -> Vec<HtmlNode> {
         self.0
             .children
