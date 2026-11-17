@@ -1,0 +1,10 @@
+/target
+/build
+/.idea
+/.vscode
+*.so
+*.dylib
+*.dll
+*.aar
+*.apk
+*.aab
