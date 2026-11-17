@@ -7,7 +7,7 @@ set_target_properties(minimalium_core PROPERTIES
 )
 
 add_library(minimalium_jni SHARED minimalium_jni.cpp)
-target_include_directories(minimalium_jni PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../../../include")
+target_include_directories(minimalium_jni PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../include")
 find_library(android-log-lib log)
 
 target_link_libraries(minimalium_jni
