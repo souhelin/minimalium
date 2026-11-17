@@ -158,7 +158,7 @@ mod tests {
 
     #[test]
     fn configured_url_size_limit_is_enforced() {
-        let mut engine = Engine::with_config(EngineConfig { max_url_bytes: 12 });
+        let mut engine = Engine::with_config(EngineConfig { max_url_bytes: 13 });
         assert!(engine.navigate("https://a.co/").is_ok());
         assert_eq!(
             engine.navigate("https://example.com"),
