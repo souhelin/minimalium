@@ -4,7 +4,7 @@
 
 Minimalium is an independent browser-engine project. It must not silently fall back to Android WebView or embed Blink/Chromium/Gecko as its rendering engine. Reuse of focused libraries is allowed after license, maintenance, security, and conformance review.
 
-The current code is only a native foundation. No HTML/CSS/JavaScript/network/rendering functionality is implemented.
+The current code is a native foundation with URL parsing/canonicalization and an initial HTML5 parser plus engine-owned DOM tree. The parser/DOM are partial: the full DOM Standard, CSS, JavaScript, networking, layout, painting, and rendering are not implemented.
 
 ## Planned layers
 
