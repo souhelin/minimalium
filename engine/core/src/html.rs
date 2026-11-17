@@ -213,6 +213,27 @@ impl DomSink {
         }
     }
 
+    fn insert_text_before(sibling: &Handle, text: &str) {
+        let Some(parent) = sibling.parent.borrow().upgrade() else {
+            return;
+        };
+        let mut children = parent.children.borrow_mut();
+        let Some(index) = children.iter().position(|item| Rc::ptr_eq(item, sibling)) else {
+            return;
+        };
+
+        if index > 0 {
+            if let NodeKind::Text(previous) = &children[index - 1].kind {
+                previous.borrow_mut().push_str(text);
+                return;
+            }
+        }
+
+        let node = Node::new(NodeKind::Text(RefCell::new(text.to_owned())));
+        *node.parent.borrow_mut() = Rc::downgrade(&parent);
+        children.insert(index, node);
+    }
+
     fn append_child_or_text(parent: &Handle, child: NodeOrText<Handle>) {
         match child {
             NodeOrText::AppendNode(node) => Self::append_node(parent, node),
@@ -289,13 +310,7 @@ impl TreeSink for DomSink {
         child: NodeOrText<Self::Handle>,
     ) {
         if element.parent.borrow().upgrade().is_some() {
-            match child {
-                NodeOrText::AppendNode(node) => Self::insert_before(element, node),
-                NodeOrText::AppendText(text) => {
-                    let text_node = Node::new(NodeKind::Text(RefCell::new(text.to_string())));
-                    Self::insert_before(element, text_node);
-                }
-            }
+            self.append_before_sibling(element, child);
         } else {
             Self::append_child_or_text(prev_element, child);
         }
@@ -336,8 +351,7 @@ impl TreeSink for DomSink {
         match new_node {
             NodeOrText::AppendNode(node) => Self::insert_before(sibling, node),
             NodeOrText::AppendText(text) => {
-                let node = Node::new(NodeKind::Text(RefCell::new(text.to_string())));
-                Self::insert_before(sibling, node);
+                Self::insert_text_before(sibling, &text);
             }
         }
     }
@@ -408,6 +422,27 @@ mod tests {
             .expect("div element should exist");
         assert_eq!(div.attribute("id").as_deref(), Some("main"));
         assert_eq!(div.text_content(), "Minimalium");
+    }
+
+    #[test]
+    fn append_before_sibling_merges_adjacent_text_nodes() {
+        let parent = Node::new(NodeKind::Document);
+        let sibling = Node::new(NodeKind::Comment("marker".to_owned()));
+        DomSink::append_text(&parent, "before");
+        DomSink::append_node(&parent, sibling.clone());
+
+        let sink = DomSink::new();
+        sink.append_before_sibling(
+            &sibling,
+            NodeOrText::AppendText(StrTendril::from("inserted")),
+        );
+
+        let children = parent.children.borrow();
+        assert_eq!(children.len(), 2);
+        match &children[0].kind {
+            NodeKind::Text(text) => assert_eq!(text.borrow().as_str(), "beforeinserted"),
+            other => panic!("expected merged text node, got {other:?}"),
+        }
     }
 
     #[test]
