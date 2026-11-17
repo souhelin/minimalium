@@ -11,8 +11,8 @@ mod navigation;
 use std::ffi::{c_char, CStr};
 
 pub use html::{parse_html, HtmlDocument, HtmlNode};
-pub use navigation::{normalize_navigation_target, validate_navigation_target, NavigationError};
 use navigation::normalize_navigation_target_with_limit;
+pub use navigation::{normalize_navigation_target, validate_navigation_target, NavigationError};
 
 /// Stable engine configuration for the initial API.
 #[derive(Debug, Clone, PartialEq, Eq)]
