@@ -16,7 +16,7 @@ The current code is only a native foundation. No HTML/CSS/JavaScript/network/ren
 
 ## Planned subsystem boundaries
 
-- `html`: tokenization and tree construction; target HTML parsing conformance tests.
+- `html`: html5ever provides HTML5 tokenization and tree construction; Minimalium owns the DOM tree sink. Add html5lib/WPT coverage before claiming full conformance.
 - `dom`: document, node ownership, mutation, events, and traversal.
 - `css`: tokenization, parsing, selectors, cascade, computed styles.
 - `layout`: formatting contexts, intrinsic sizing, fragmentation, and viewport layout.
@@ -43,4 +43,4 @@ The JavaScript runtime is a separate subsystem. DOM, timers, events, Fetch, prom
 
 ## Dependency policy
 
-Every dependency needs a recorded purpose, license, maintenance review, known vulnerability review, and replacement strategy. Prefer standards-oriented components with active maintenance. No engine dependency is approved by this document.
+Every dependency needs a recorded purpose, license, maintenance review, known vulnerability review, and replacement strategy. Prefer standards-oriented components with active maintenance. Approved initial dependencies: `url` for WHATWG URL parsing and `html5ever` for HTML5 tokenization/tree construction. The DOM sink is maintained by Minimalium. All other engine dependencies remain subject to review.

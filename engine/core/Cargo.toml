@@ -4,13 +4,14 @@ version = "0.1.0"
 description = "Foundational native core for the independent Minimalium browser engine"
 edition.workspace = true
 license.workspace = true
-rust-version.workspace = true
+rust-version = "1.85"
 
 [lib]
 name = "minimalium_core"
 crate-type = ["rlib", "cdylib"]
 
 [dependencies]
+html5ever = "0.40.1"
 url = "2.5"
 
 [lints]

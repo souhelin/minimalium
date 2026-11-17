@@ -18,10 +18,13 @@ This roadmap is gated by automated tests, security review, and reproducible buil
 - [ ] Add network tests, including redirect and private-network policy.
 - [ ] Add DNS rebinding and SSRF protections before arbitrary URL loading.
 
-## M2 — HTML and DOM
-- [ ] HTML5 tokenizer and tree builder using an audited standards implementation.
-- [ ] DOM node model, mutation, traversal, and basic events.
-- [ ] Run relevant Web Platform Tests (WPT).
+## M2 — HTML and DOM (in progress)
+- [x] Integrate html5ever for HTML5 tokenization and tree construction.
+- [x] Add an engine-owned DOM tree sink with document, element, text, comment, doctype, and template-content nodes.
+- [x] Add initial DOM inspection APIs for tag names, attributes, children, and text content.
+- [ ] Complete DOM Standard mutation, traversal, events, ranges, forms, and custom elements.
+- [ ] Add html5lib tokenizer/tree-construction tests and relevant Web Platform Tests (WPT).
+- [ ] Fuzz HTML parsing and enforce document/input resource limits.
 
 ## M3 — CSS and layout
 - [ ] CSS parser, selectors, cascade, computed values.
