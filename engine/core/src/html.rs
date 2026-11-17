@@ -73,7 +73,7 @@ impl HtmlNode {
     pub fn attribute(&self, qualified_name: &str) -> Option<String> {
         match &self.0.kind {
             NodeKind::Element { name, attrs } => {
-                let is_html_element = name.ns.as_ref() == "http://www.w3.org/1999/xhtml";
+                let is_html_element = &*name.ns == "http://www.w3.org/1999/xhtml";
                 attrs
                     .borrow()
                     .iter()
