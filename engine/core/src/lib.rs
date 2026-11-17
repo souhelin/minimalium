@@ -4,13 +4,13 @@
 //! It is not yet a complete browser: networking, HTML/DOM, CSS, JavaScript,
 //! painting, storage, and process isolation are separate milestones.
 
-mod navigation;
 pub mod html;
+mod navigation;
 
 use std::ffi::{c_char, CStr};
 
-pub use navigation::{normalize_navigation_target, validate_navigation_target, NavigationError};
 pub use html::{parse_html, HtmlDocument, HtmlNode};
+pub use navigation::{normalize_navigation_target, validate_navigation_target, NavigationError};
 
 /// Stable engine configuration for the initial API.
 #[derive(Debug, Clone, PartialEq, Eq)]
