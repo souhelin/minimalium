@@ -12,6 +12,7 @@ use std::ffi::{c_char, CStr};
 
 pub use html::{parse_html, HtmlDocument, HtmlNode};
 pub use navigation::{normalize_navigation_target, validate_navigation_target, NavigationError};
+use navigation::normalize_navigation_target_with_limit;
 
 /// Stable engine configuration for the initial API.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -31,6 +32,7 @@ impl Default for EngineConfig {
 /// Minimal engine state. Later milestones will add document and session types.
 #[derive(Debug, Default)]
 pub struct Engine {
+    config: EngineConfig,
     last_navigation_target: Option<String>,
 }
 
@@ -39,9 +41,20 @@ impl Engine {
         Self::default()
     }
 
+    /// Creates an engine with explicit resource limits.
+    pub fn with_config(config: EngineConfig) -> Self {
+        Self {
+            config,
+            last_navigation_target: None,
+        }
+    }
+
     /// Validates and records a canonical target. This does not perform network I/O.
     pub fn navigate(&mut self, target: &str) -> Result<(), NavigationError> {
-        self.last_navigation_target = Some(normalize_navigation_target(target)?);
+        self.last_navigation_target = Some(normalize_navigation_target_with_limit(
+            target,
+            self.config.max_url_bytes,
+        )?);
         Ok(())
     }
 
@@ -141,6 +154,16 @@ mod tests {
         let mut engine = Engine::new();
         assert!(engine.navigate("file:///etc/passwd").is_err());
         assert!(engine.navigate("javascript:alert(1)").is_err());
+    }
+
+    #[test]
+    fn configured_url_size_limit_is_enforced() {
+        let mut engine = Engine::with_config(EngineConfig { max_url_bytes: 12 });
+        assert!(engine.navigate("https://a.co/").is_ok());
+        assert_eq!(
+            engine.navigate("https://example.com"),
+            Err(NavigationError::TooLong)
+        );
     }
 
     #[test]
