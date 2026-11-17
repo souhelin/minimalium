@@ -64,13 +64,33 @@ impl HtmlNode {
         }
     }
 
-    pub fn attribute(&self, name: &str) -> Option<String> {
+    /// Returns an attribute by its qualified name.
+    ///
+    /// HTML elements use the ASCII case-insensitive lookup required by
+    /// Element.getAttribute(). Foreign-content elements use case-sensitive
+    /// qualified-name matching. Prefixes are part of the qualified name, so
+    /// `href` and `xlink:href` remain distinct.
+    pub fn attribute(&self, qualified_name: &str) -> Option<String> {
         match &self.0.kind {
-            NodeKind::Element { attrs, .. } => attrs
-                .borrow()
-                .iter()
-                .find(|attr| attr.name.local.to_string() == name)
-                .map(|attr| attr.value.to_string()),
+            NodeKind::Element { name, attrs } => {
+                let is_html_element = name.ns.as_ref() == "http://www.w3.org/1999/xhtml";
+                attrs
+                    .borrow()
+                    .iter()
+                    .find(|attr| {
+                        let attr_qualified_name = match &attr.name.prefix {
+                            Some(prefix) => format!("{}:{}", prefix, attr.name.local),
+                            None => attr.name.local.to_string(),
+                        };
+
+                        if is_html_element {
+                            attr_qualified_name.eq_ignore_ascii_case(qualified_name)
+                        } else {
+                            attr_qualified_name == qualified_name
+                        }
+                    })
+                    .map(|attr| attr.value.to_string())
+            }
             _ => None,
         }
     }
@@ -422,6 +442,43 @@ mod tests {
             .expect("div element should exist");
         assert_eq!(div.attribute("id").as_deref(), Some("main"));
         assert_eq!(div.text_content(), "Minimalium");
+    }
+
+    #[test]
+    fn attribute_lookup_distinguishes_namespaced_qualified_names() {
+        let document = parse_html(
+            "<svg><use href='#plain' xlink:href='#legacy'></use></svg><div id='html'></div>",
+        );
+        let use_element = document
+            .root()
+            .children()
+            .into_iter()
+            .flat_map(|node| node.children())
+            .flat_map(|node| node.children())
+            .find(|node| node.tag_name().as_deref() == Some("use"))
+            .expect("SVG use element should exist");
+
+        assert_eq!(use_element.attribute("href").as_deref(), Some("#plain"));
+        assert_eq!(
+            use_element.attribute("xlink:href").as_deref(),
+            Some("#legacy")
+        );
+        assert_eq!(use_element.attribute("HREF"), None);
+    }
+
+    #[test]
+    fn html_attribute_lookup_is_ascii_case_insensitive() {
+        let document = parse_html("<div id='html'></div>");
+        let div = document
+            .root()
+            .children()
+            .into_iter()
+            .flat_map(|node| node.children())
+            .flat_map(|node| node.children())
+            .find(|node| node.tag_name().as_deref() == Some("div"))
+            .expect("div element should exist");
+
+        assert_eq!(div.attribute("ID").as_deref(), Some("html"));
     }
 
     #[test]
