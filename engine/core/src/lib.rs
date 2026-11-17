@@ -7,7 +7,7 @@ mod navigation;
 
 use std::ffi::{c_char, CStr};
 
-pub use navigation::{NavigationError, validate_navigation_target};
+pub use navigation::{validate_navigation_target, NavigationError};
 
 /// Stable engine configuration for the initial API.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -18,7 +18,7 @@ pub struct EngineConfig {
 
 impl Default for EngineConfig {
     fn default() -> Self {
-        Self { max_url_bytes: 8 * 1024 }
+        Self {\n            max_url_bytes: 8 * 1024,\n        }
     }
 }
 
