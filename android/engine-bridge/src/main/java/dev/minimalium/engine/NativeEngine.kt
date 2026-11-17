@@ -17,11 +17,13 @@ class NativeEngine : AutoCloseable {
      * Validates and records an HTTP(S) target. This is not a network request.
      * @return 0 on success; nonzero on failure.
      */
+    @Synchronized
     fun validateNavigationTarget(url: String): Int {
         check(handle != 0L) { "Engine is closed" }
-        return nativeNavigate(handle, url)
+        return nativeNavigate(handle, url.encodeToByteArray())
     }
 
+    @Synchronized
     override fun close() {
         if (handle != 0L) {
             nativeDestroy(handle)
@@ -30,7 +32,7 @@ class NativeEngine : AutoCloseable {
     }
 
     private external fun nativeCreate(): Long
-    private external fun nativeNavigate(handle: Long, url: String): Int
+    private external fun nativeNavigate(handle: Long, url: ByteArray): Int
     private external fun nativeDestroy(handle: Long)
 
     companion object {
