@@ -5,10 +5,10 @@
 //! Script execution, custom elements, shadow DOM, mutation observers, and the
 //! full DOM Standard remain out of scope.
 
-use html5ever::interface::{Attribute, ElemName, ElementFlags, NodeOrText, QuirksMode, TreeSink};
+use html5ever::interface::{Attribute, ElementFlags, NodeOrText, QuirksMode, TreeSink};
 use html5ever::tendril::{StrTendril, TendrilSink};
 use html5ever::{parse_document, QualName};
-use std::cell::{Cell, Ref, RefCell};
+use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
 type Handle = Rc<Node>;
@@ -69,7 +69,7 @@ impl HtmlNode {
             NodeKind::Element { attrs, .. } => attrs
                 .borrow()
                 .iter()
-                .find(|attr| attr.name.local.as_ref() == name)
+                .find(|attr| attr.name.local.to_string() == name)
                 .map(|attr| attr.value.to_string()),
             _ => None,
         }
@@ -196,7 +196,7 @@ impl DomSink {
 impl TreeSink for DomSink {
     type Handle = Handle;
     type Output = HtmlDocument;
-    type ElemName<'a> = Ref<'a, QualName>;
+    type ElemName<'a> = &'a QualName;
 
     fn finish(self) -> Self::Output {
         HtmlDocument {
@@ -215,10 +215,10 @@ impl TreeSink for DomSink {
     }
 
     fn elem_name<'a>(&'a self, target: &'a Self::Handle) -> Self::ElemName<'a> {
-        Ref::map(target.kind.borrow(), |kind| match kind {
+        match &target.kind {
             NodeKind::Element { name, .. } => name,
             _ => panic!("html5ever requested the name of a non-element node"),
-        })
+        }
     }
 
     fn create_element(
@@ -227,8 +227,8 @@ impl TreeSink for DomSink {
         attrs: Vec<Attribute>,
         _flags: ElementFlags,
     ) -> Self::Handle {
-        let is_template =
-            name.ns.as_ref() == "http://www.w3.org/1999/xhtml" && name.local.as_ref() == "template";
+        let is_template = name.ns.to_string() == "http://www.w3.org/1999/xhtml"
+            && name.local.to_string() == "template";
         let element = Node::new(NodeKind::Element {
             name,
             attrs: RefCell::new(attrs),
