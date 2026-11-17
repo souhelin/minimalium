@@ -6,7 +6,6 @@
 mod navigation;
 
 use std::ffi::{c_char, CStr};
-use std::ptr;
 
 pub use navigation::{NavigationError, validate_navigation_target};
 
