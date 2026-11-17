@@ -30,4 +30,4 @@ The exact NDK linker configuration and Gradle integration must be added and veri
 
 ## Important
 
-The current `validateNavigationTarget` method only checks a limited HTTP(S) URL shape and stores it in native memory. It does not open a socket, fetch a document, parse HTML, execute JavaScript, or render a page.
+The current `validateNavigationTarget` method parses and canonicalizes an absolute HTTP(S) URL with the Rust `url` crate and stores the resulting target in native memory. It does not open a socket, fetch a document, parse a response, execute JavaScript, or render a page. URL validation alone does not enforce DNS/IP, redirect, TLS, or origin security policies.
