@@ -90,7 +90,7 @@ impl HtmlNode {
     }
 
     pub fn is_document(&self) -> bool {
-        matches!(self.0.kind, NodeKind::Document)
+        matches!(&self.0.kind, NodeKind::Document)
     }
 }
 
@@ -145,9 +145,11 @@ impl DomSink {
 
     fn append_text(parent: &Handle, text: &str) {
         let mut children = parent.children.borrow_mut();
-        if let Some(Node { kind: NodeKind::Text(existing), .. }) = children.last() {
-            existing.borrow_mut().push_str(text);
-            return;
+        if let Some(last) = children.last() {
+            if let NodeKind::Text(existing) = &last.kind {
+                existing.borrow_mut().push_str(text);
+                return;
+            }
         }
         let child = Node::new(NodeKind::Text(RefCell::new(text.to_owned())));
         *child.parent.borrow_mut() = Rc::downgrade(parent);
@@ -243,11 +245,12 @@ impl TreeSink for DomSink {
         child: NodeOrText<Self::Handle>,
     ) {
         if element.parent.borrow().upgrade().is_some() {
-            if let NodeOrText::AppendNode(node) = child {
-                Self::insert_before(element, node);
-            } else if let NodeOrText::AppendText(text) = child {
-                let text_node = Node::new(NodeKind::Text(RefCell::new(text.to_string())));
-                Self::insert_before(element, text_node);
+            match child {
+                NodeOrText::AppendNode(node) => Self::insert_before(element, node),
+                NodeOrText::AppendText(text) => {
+                    let text_node = Node::new(NodeKind::Text(RefCell::new(text.to_string())));
+                    Self::insert_before(element, text_node);
+                }
             }
         } else {
             Self::append_child_or_text(prev_element, child);
