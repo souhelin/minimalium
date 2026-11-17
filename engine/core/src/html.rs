@@ -508,7 +508,7 @@ mod tests {
     }
 
     #[test]
-    fn reports_malformed_markup_errors_when_present() {
+    fn recovers_from_malformed_markup() {
         let document = parse_html("<div><span></div>");
         // The HTML5 parser recovers malformed markup; errors are diagnostics,
         // not a reason to reject the document.
