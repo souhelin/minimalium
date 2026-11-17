@@ -4,6 +4,8 @@
 
 The current foundation does not load or execute web content. It is not safe to expose as a general-purpose browser and must not be described as sandboxed or production-ready.
 
+The initial HTML parser currently has no explicit input-size, node-count, nesting-depth, or execution-time budget. Do not use it to parse arbitrary untrusted or very large documents until resource limits and parser stress/fuzz tests are implemented.
+
 Navigation targets are parsed and canonicalized with the Rust `url` crate, which provides standards-oriented URL handling. This validation is **not a network security boundary**: it does not resolve DNS, enforce public-address policy, validate redirects, establish TLS connections, or implement an origin model. Those controls must be designed and tested before network loading is implemented.
 
 ## Required controls before loading untrusted content
