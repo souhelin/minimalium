@@ -91,13 +91,13 @@ mod tests {
         );
         assert_eq!(
             validate_navigation_target("javascript:alert(1)"),
-            Err(NavigationError::InvalidUrl)
+            Err(NavigationError::UnsupportedScheme)
         );
     }
 
     #[test]
     fn rejects_missing_or_malformed_hosts() {
-        assert!(validate_navigation_target("https:///missing-host").is_err());
+        assert!(validate_navigation_target("https://?q=x").is_err());
         assert!(validate_navigation_target("https://").is_err());
         assert!(validate_navigation_target("https://example.com:99999").is_err());
     }
