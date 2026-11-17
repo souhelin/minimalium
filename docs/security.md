@@ -4,7 +4,7 @@
 
 The current foundation does not load or execute web content. It is not safe to expose as a general-purpose browser and must not be described as sandboxed or production-ready.
 
-The initial URL gate is intentionally minimal and is **not a standards-compliant URL parser or a security boundary**. Replace it before network loading is implemented.
+Navigation targets are parsed and canonicalized with the Rust `url` crate, which provides standards-oriented URL handling. This validation is **not a network security boundary**: it does not resolve DNS, enforce public-address policy, validate redirects, establish TLS connections, or implement an origin model. Those controls must be designed and tested before network loading is implemented.
 
 ## Required controls before loading untrusted content
 
