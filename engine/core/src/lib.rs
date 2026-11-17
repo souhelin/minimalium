@@ -8,9 +8,7 @@ mod navigation;
 
 use std::ffi::{c_char, CStr};
 
-pub use navigation::{
-    normalize_navigation_target, validate_navigation_target, NavigationError,
-};
+pub use navigation::{normalize_navigation_target, validate_navigation_target, NavigationError};
 
 /// Stable engine configuration for the initial API.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -21,7 +19,9 @@ pub struct EngineConfig {
 
 impl Default for EngineConfig {
     fn default() -> Self {
-        Self { max_url_bytes: 8 * 1024 }
+        Self {
+            max_url_bytes: 8 * 1024,
+        }
     }
 }
 
@@ -127,7 +127,10 @@ mod tests {
     fn navigation_records_canonical_https_target() {
         let mut engine = Engine::new();
         engine.navigate("HTTPS://EXAMPLE.COM:443/path").unwrap();
-        assert_eq!(engine.last_navigation_target(), Some("https://example.com/path"));
+        assert_eq!(
+            engine.last_navigation_target(),
+            Some("https://example.com/path")
+        );
     }
 
     #[test]
@@ -140,6 +143,8 @@ mod tests {
     #[test]
     fn navigation_rejects_credentials() {
         let mut engine = Engine::new();
-        assert!(engine.navigate("https://user:password@example.com").is_err());
+        assert!(engine
+            .navigate("https://user:password@example.com")
+            .is_err());
     }
 }
