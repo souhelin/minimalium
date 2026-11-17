@@ -10,5 +10,8 @@ rust-version.workspace = true
 name = "minimalium_core"
 crate-type = ["rlib", "cdylib"]
 
+[dependencies]
+url = "2.5"
+
 [lints]
 workspace = true

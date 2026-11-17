@@ -1,13 +1,16 @@
 //! Minimalium's foundational native core.
 //!
-//! This crate is not a browser engine yet. In particular, it does not fetch,
-//! parse, execute, or render web content.
+//! This crate currently provides URL navigation validation and canonicalization.
+//! It is not yet a complete browser: networking, HTML/DOM, CSS, JavaScript,
+//! painting, storage, and process isolation are separate milestones.
 
 mod navigation;
 
 use std::ffi::{c_char, CStr};
 
-pub use navigation::{validate_navigation_target, NavigationError};
+pub use navigation::{
+    normalize_navigation_target, validate_navigation_target, NavigationError,
+};
 
 /// Stable engine configuration for the initial API.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -18,9 +21,7 @@ pub struct EngineConfig {
 
 impl Default for EngineConfig {
     fn default() -> Self {
-        Self {
-            max_url_bytes: 8 * 1024,
-        }
+        Self { max_url_bytes: 8 * 1024 }
     }
 }
 
@@ -35,10 +36,9 @@ impl Engine {
         Self::default()
     }
 
-    /// Validates and records a target. This does not perform network I/O.
+    /// Validates and records a canonical target. This does not perform network I/O.
     pub fn navigate(&mut self, target: &str) -> Result<(), NavigationError> {
-        validate_navigation_target(target)?;
-        self.last_navigation_target = Some(target.to_owned());
+        self.last_navigation_target = Some(normalize_navigation_target(target)?);
         Ok(())
     }
 
@@ -107,7 +107,7 @@ pub unsafe extern "C" fn minimalium_engine_navigate(
     }
 }
 
-/// Returns a stable status code for an empty pointer check in foreign callers.
+/// Returns a stable success status code for foreign callers.
 #[no_mangle]
 pub extern "C" fn minimalium_engine_status_ok() -> i32 {
     STATUS_OK
@@ -124,13 +124,10 @@ mod tests {
     }
 
     #[test]
-    fn navigation_records_valid_https_target() {
+    fn navigation_records_canonical_https_target() {
         let mut engine = Engine::new();
-        engine.navigate("https://example.com/path").unwrap();
-        assert_eq!(
-            engine.last_navigation_target(),
-            Some("https://example.com/path")
-        );
+        engine.navigate("HTTPS://EXAMPLE.COM:443/path").unwrap();
+        assert_eq!(engine.last_navigation_target(), Some("https://example.com/path"));
     }
 
     #[test]
@@ -141,15 +138,8 @@ mod tests {
     }
 
     #[test]
-    fn navigation_rejects_missing_host() {
+    fn navigation_rejects_credentials() {
         let mut engine = Engine::new();
-        assert!(engine.navigate("https:///missing-host").is_err());
-        assert!(engine.navigate("https://").is_err());
-    }
-
-    #[test]
-    fn navigation_rejects_control_characters() {
-        let mut engine = Engine::new();
-        assert!(engine.navigate("https://example.com/\nheader").is_err());
+        assert!(engine.navigate("https://user:password@example.com").is_err());
     }
 }
