@@ -5,9 +5,7 @@
 //! Script execution, custom elements, shadow DOM, mutation observers, and the
 //! full DOM Standard remain out of scope.
 
-use html5ever::interface::{
-    Attribute, ElemName, ElementFlags, NodeOrText, QuirksMode, TreeSink,
-};
+use html5ever::interface::{Attribute, ElemName, ElementFlags, NodeOrText, QuirksMode, TreeSink};
 use html5ever::tendril::{StrTendril, TendrilSink};
 use html5ever::{parse_document, QualName};
 use std::cell::{Cell, Ref, RefCell};
@@ -19,11 +17,21 @@ type Handle = Rc<Node>;
 enum NodeKind {
     Document,
     DocumentFragment,
-    Doctype { name: String, public_id: String, system_id: String },
-    Element { name: QualName, attrs: RefCell<Vec<Attribute>> },
+    Doctype {
+        name: String,
+        public_id: String,
+        system_id: String,
+    },
+    Element {
+        name: QualName,
+        attrs: RefCell<Vec<Attribute>>,
+    },
     Text(RefCell<String>),
     Comment(String),
-    ProcessingInstruction { target: String, data: String },
+    ProcessingInstruction {
+        target: String,
+        data: String,
+    },
 }
 
 #[derive(Debug)]
@@ -68,7 +76,13 @@ impl HtmlNode {
     }
 
     pub fn children(&self) -> Vec<HtmlNode> {
-        self.0.children.borrow().iter().cloned().map(HtmlNode).collect()
+        self.0
+            .children
+            .borrow()
+            .iter()
+            .cloned()
+            .map(HtmlNode)
+            .collect()
     }
 
     pub fn text_content(&self) -> String {
@@ -132,7 +146,10 @@ impl DomSink {
 
     fn detach(node: &Handle) {
         if let Some(parent) = node.parent.borrow().upgrade() {
-            parent.children.borrow_mut().retain(|child| !Rc::ptr_eq(child, node));
+            parent
+                .children
+                .borrow_mut()
+                .retain(|child| !Rc::ptr_eq(child, node));
         }
         *node.parent.borrow_mut() = Weak::new();
     }
@@ -210,15 +227,14 @@ impl TreeSink for DomSink {
         attrs: Vec<Attribute>,
         _flags: ElementFlags,
     ) -> Self::Handle {
-        let is_template = name.ns.as_ref() == "http://www.w3.org/1999/xhtml"
-            && name.local.as_ref() == "template";
+        let is_template =
+            name.ns.as_ref() == "http://www.w3.org/1999/xhtml" && name.local.as_ref() == "template";
         let element = Node::new(NodeKind::Element {
             name,
             attrs: RefCell::new(attrs),
         });
         if is_template {
-            *element.template_contents.borrow_mut() =
-                Some(Node::new(NodeKind::DocumentFragment));
+            *element.template_contents.borrow_mut() = Some(Node::new(NodeKind::DocumentFragment));
         }
         element
     }
@@ -288,11 +304,7 @@ impl TreeSink for DomSink {
         self.quirks_mode.set(mode);
     }
 
-    fn append_before_sibling(
-        &self,
-        sibling: &Self::Handle,
-        new_node: NodeOrText<Self::Handle>,
-    ) {
+    fn append_before_sibling(&self, sibling: &Self::Handle, new_node: NodeOrText<Self::Handle>) {
         match new_node {
             NodeOrText::AppendNode(node) => Self::insert_before(sibling, node),
             NodeOrText::AppendText(text) => {
@@ -303,7 +315,10 @@ impl TreeSink for DomSink {
     }
 
     fn add_attrs_if_missing(&self, target: &Self::Handle, attrs: Vec<Attribute>) {
-        let NodeKind::Element { attrs: existing, .. } = &target.kind else {
+        let NodeKind::Element {
+            attrs: existing, ..
+        } = &target.kind
+        else {
             return;
         };
         let mut existing = existing.borrow_mut();
@@ -344,7 +359,10 @@ mod tests {
         let document = parse_html("<title>Example</title><p>Hello <b>world");
         let root = document.root();
         assert!(root.is_document());
-        let html = root.children().into_iter().find(|node| node.tag_name().as_deref() == Some("html"));
+        let html = root
+            .children()
+            .into_iter()
+            .find(|node| node.tag_name().as_deref() == Some("html"));
         assert!(html.is_some());
         assert!(root.text_content().contains("Hello world"));
     }
@@ -352,7 +370,10 @@ mod tests {
     #[test]
     fn preserves_attributes_and_text() {
         let document = parse_html("<div id='main' data-kind='demo'>Minimalium</div>");
-        let div = document.root().children().into_iter()
+        let div = document
+            .root()
+            .children()
+            .into_iter()
             .flat_map(|node| node.children())
             .flat_map(|node| node.children())
             .find(|node| node.tag_name().as_deref() == Some("div"))
