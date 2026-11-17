@@ -10,7 +10,7 @@ Navigation targets are parsed and canonicalized with the Rust `url` crate, which
 
 ## Required controls before loading untrusted content
 
-- Standards-compliant URL parsing and canonicalization.
+- Standards-based URL parsing and canonicalization, combined with explicit scheme, origin, redirect, DNS/IP, and connection policies.
 - HTTPS certificate and hostname validation; no insecure fallback.
 - Same-origin policy and a clearly specified origin model.
 - Content Security Policy and mixed-content policy.
