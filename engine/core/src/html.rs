@@ -449,12 +449,17 @@ mod tests {
         let document = parse_html(
             "<svg><use href='#plain' xlink:href='#legacy'></use></svg><div id='html'></div>",
         );
-        let use_element = document
+        let svg = document
             .root()
             .children()
             .into_iter()
             .flat_map(|node| node.children())
             .flat_map(|node| node.children())
+            .find(|node| node.tag_name().as_deref() == Some("svg"))
+            .expect("SVG element should exist");
+        let use_element = svg
+            .children()
+            .into_iter()
             .find(|node| node.tag_name().as_deref() == Some("use"))
             .expect("SVG use element should exist");
 
