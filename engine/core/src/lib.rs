@@ -18,7 +18,9 @@ pub struct EngineConfig {
 
 impl Default for EngineConfig {
     fn default() -> Self {
-        Self {\n            max_url_bytes: 8 * 1024,\n        }
+        Self {
+            max_url_bytes: 8 * 1024,
+        }
     }
 }
 
