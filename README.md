@@ -2,7 +2,7 @@
 
 Independent Android-first browser-engine research project focused on performance, security, and a small native core.
 
-> **Status: foundation / pre-alpha.** This repository does not yet implement a web browser. The current milestone establishes a compilable Rust core, a narrow C ABI, an Android JNI bridge contract, tests, and architecture documentation. It does not parse HTML, execute JavaScript, fetch network resources, render pages, or provide a security sandbox.
+> **Status: foundation / pre-alpha.** This repository does not yet implement a web browser. The current milestone establishes a compilable Rust core, a narrow C ABI, an Android JNI bridge contract, an HTML5 parser with an initial engine-owned DOM tree, tests, and architecture documentation. It does not implement the full DOM Standard, execute JavaScript, fetch network resources, render pages, or provide a security sandbox.
 
 ## Project principles
 
