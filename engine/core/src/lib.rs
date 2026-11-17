@@ -1,8 +1,9 @@
 //! Minimalium's foundational native core.
 //!
-//! This crate currently provides URL navigation validation and canonicalization.
-//! It is not yet a complete browser: networking, HTML/DOM, CSS, JavaScript,
-//! painting, storage, and process isolation are separate milestones.
+//! This crate currently provides URL navigation validation and canonicalization,
+//! plus an HTML5 parser backed by html5ever and an initial engine-owned DOM tree.
+//! It is not yet a complete browser: full DOM behavior, networking, CSS, JavaScript,
+//! painting, storage, and process isolation remain separate milestones.
 
 pub mod html;
 mod navigation;
